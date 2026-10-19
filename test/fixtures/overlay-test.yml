@@ -1,0 +1,4 @@
+# 测试用补丁层（内容无关紧要，只验证 --patch 参数确实被传给 dsh）
+- id: system-prompt
+  config:
+    personaSuffix: Test overlay; working directory is {{cwd}}.

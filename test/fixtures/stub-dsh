@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+// 测试替身：模拟 `dsh --profile headless --json ... -` 的事件流。
+// 把 stdin 收到的 prompt 直接回显进最终答复，便于断言“prompt 确实送达 agent”。
+//   STUB_DSH_RECORD  调用记录文件（每行一条 JSON：args / cwd / permissionMode）
+import { appendFileSync, readFileSync } from "node:fs";
+
+const args = process.argv.slice(2);
+let prompt = "";
+try {
+  prompt = readFileSync(0, "utf8");
+} catch {
+  prompt = "";
+}
+
+if (process.env.STUB_DSH_RECORD) {
+  appendFileSync(process.env.STUB_DSH_RECORD, `${JSON.stringify({
+    args,
+    cwd: process.cwd(),
+    permissionMode: process.env.DSH_PERMISSION_MODE,
+    telemetryMode: process.env.DSH_TELEMETRY_MODE,
+    prompt
+  })}\n`);
+}
+
+const sessionIndex = args.indexOf("--session-id");
+const sessionId = sessionIndex >= 0 ? args[sessionIndex + 1] : "session-stub-0001";
+const echo = prompt.trim();
+
+for (const event of [
+  { type: "session", sessionId, cwd: process.cwd() },
+  { type: "status", phase: "turn_start", turn: 1 },
+  { type: "status", phase: "step_start", turn: 1, step: 1 },
+  { type: "tool", name: "bash", status: "ok" },
+  { type: "text", text: `草稿：${echo}` },
+  { type: "status", phase: "step_end", turn: 1, step: 1, usage: { inputTokens: 1, outputTokens: 1, totalTokens: 2 } },
+  { type: "status", phase: "turn_end", turn: 1, reason: { kind: "completed" } },
+  { type: "final", text: `E2E-答复：${echo}` }
+]) {
+  process.stdout.write(`${JSON.stringify(event)}\n`);
+}

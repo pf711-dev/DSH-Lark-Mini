@@ -1,0 +1,32 @@
+[
+  {
+    "type": "im.message.receive_v1",
+    "message_id": "om_e2e_1",
+    "chat_id": "oc_e2e_chat",
+    "chat_type": "p2p",
+    "sender_id": "ou_test_user",
+    "sender_type": "user",
+    "message_type": "text",
+    "content": "你好，帮我回个话"
+  },
+  {
+    "type": "im.message.receive_v1",
+    "message_id": "om_e2e_2",
+    "chat_id": "oc_e2e_chat",
+    "chat_type": "p2p",
+    "sender_id": "ou_stranger",
+    "sender_type": "user",
+    "message_type": "text",
+    "content": "我是白名单外的陌生人，不该被处理"
+  },
+  {
+    "type": "im.message.receive_v1",
+    "message_id": "om_e2e_3",
+    "chat_id": "oc_e2e_chat",
+    "chat_type": "p2p",
+    "sender_id": "ou_test_user",
+    "sender_type": "user",
+    "message_type": "image",
+    "content": "[图片]"
+  }
+]

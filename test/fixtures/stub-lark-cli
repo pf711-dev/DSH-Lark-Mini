@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+// 测试替身：模拟 lark-cli 的 event consume 与 im 发送命令。
+// 由 test/e2e.test.mjs 驱动，不接触飞书网络。
+//   STUB_LARK_EVENTS       事件 JSON 数组文件（consume 时逐行打印）
+//   STUB_LARK_RECORD       调用记录文件（每行一条 JSON）
+//   STUB_LARK_LIFETIME_MS  consume 进程最长存活时间（默认 30s，之后自行退出）
+//
+// 关键语义（复制真实 lark-cli）：**stdin EOF = 关闭信号**，
+// 所以桥端必须让 stdin 一直开着，否则消费进程会立刻退出、永远收不到事件。
+import { appendFileSync, readFileSync } from "node:fs";
+
+const args = process.argv.slice(2);
+const record = process.env.STUB_LARK_RECORD;
+
+function log(entry) {
+  if (record) appendFileSync(record, `${JSON.stringify(entry)}\n`);
+}
+
+function flag(name) {
+  const index = args.indexOf(name);
+  return index >= 0 ? args[index + 1] : undefined;
+}
+
+function runConsume() {
+  log({
+    kind: "consume",
+    args,
+    proxy: process.env.http_proxy ?? process.env.HTTP_PROXY ?? null,
+    allProxy: process.env.all_proxy ?? process.env.ALL_PROXY ?? null,
+    nodeOptions: process.env.NODE_OPTIONS ?? null
+  });
+  process.stdin.resume();
+  process.stdin.on("end", () => {
+    log({ kind: "stdin-eof" });
+    process.exit(5);
+  });
+  const events = JSON.parse(readFileSync(process.env.STUB_LARK_EVENTS, "utf8"));
+  for (const event of events) process.stdout.write(`${JSON.stringify(event)}\n`);
+  process.on("SIGTERM", () => process.exit(0));
+  setTimeout(() => process.exit(0), Number(process.env.STUB_LARK_LIFETIME_MS ?? 30000));
+}
+
+function runSend() {
+  const command = args.find((arg) => arg.startsWith("+")) ?? args[0];
+  const text = flag("--markdown") ?? flag("--text") ?? "";
+  log({ kind: command, messageId: flag("--message-id"), chatId: flag("--chat-id"), text });
+  if (command === "+messages-reply") {
+    process.stdout.write(`${JSON.stringify({ ok: true, data: { message_id: "om_reply_stub_1" } })}\n`);
+  } else {
+    process.stdout.write(`${JSON.stringify({ ok: true })}\n`);
+  }
+}
+
+if (args.includes("event") && args.includes("consume")) runConsume();
+else runSend();

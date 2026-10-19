@@ -1,0 +1,8 @@
+{
+  "larkCli": "./stub-lark-cli",
+  "larkIdentity": "bot",
+  "pushTargets": {
+    "test群": "oc_push_target",
+    "日报群": "oc_daily_report"
+  }
+}

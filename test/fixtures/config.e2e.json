@@ -1,0 +1,26 @@
+{
+  "larkCli": "./stub-lark-cli",
+  "larkIdentity": "bot",
+
+  "allowOpenIds": ["ou_test_user"],
+  "allowChatIds": [],
+  "allowGroups": false,
+
+  "ackEnabled": true,
+  "progressEnabled": true,
+  "progressMinIntervalMs": 4000,
+  "maxReplyChars": 4000,
+  "maxPromptChars": 4000,
+
+  "dshBin": "./stub-dsh",
+  "dshProfile": "headless",
+  "dshOverlay": "./overlay-test.yml",
+  "workspace": "./run/workspace",
+  "permissionMode": "workspace-write",
+  "telemetryMode": "DISABLED",
+  "turnTimeoutMs": 30000,
+
+  "stateFile": "./run/state.json",
+  "logFile": "./run/bridge.log",
+  "restartDelayMs": 150
+}

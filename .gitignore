@@ -1,0 +1,10 @@
+# 个人配置与运行态，不入库
+config.json
+state/
+workspace/*
+!workspace/.gitkeep
+
+# 测试运行产物
+test/fixtures/run*/
+node_modules/
+.DS_Store
